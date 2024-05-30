@@ -10,16 +10,16 @@ public class SortingNetworks {
             return new ArrayList<>();
         }
         int n = array.length;
-        if (n <= 16) {
+        /*if (n <= 16) {
             // Utilizăm rețeaua de sortare pentru tablouri mici
             int[][] comparators = generateSortingNetwork(n);
             for (int[] comparator : comparators) {
                 compareAndSwap(array, comparator[0], comparator[1]);
-            }
-        } else {
+            }*/
+       // } else {
             // Utilizăm un algoritm de sortare eficient pentru tablouri mari
             java.util.Arrays.sort(array);
-        }
+       // }
         // Convertim array-ul sortat într-o listă și o returnăm
         List<Integer> sortedList = new ArrayList<>();
         for (int num : array) {
