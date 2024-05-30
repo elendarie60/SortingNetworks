@@ -1,9 +1,16 @@
 package sortingnetworks;
 import java.util.List;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.Pane;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -11,6 +18,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.scene.shape.Line;
+import javafx.scene.paint.Color;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -30,7 +39,13 @@ public class Main extends Application {
         Label inputLabel = new Label("Introduceți numere separate prin virgulă:");
         inputField = new TextField();
         Button sortButton = new Button("Sortează");
-        sortButton.setOnAction(e -> sortNumbers());
+        sortButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                sortNumbers();
+                openSortingVisualizer();
+            }
+        });
 
         outputLabel = new Label();
         historyArea = new TextArea();
@@ -103,6 +118,56 @@ public class Main extends Application {
         String historyStr = historyBuilder.toString();
         historyArea.setText(historyStr);
     }
+
+     private void openSortingVisualizer() {
+        Stage stage = new Stage();
+        stage.setTitle("Sorting Network Visualizer");
+
+        String input = inputField.getText();
+        String[] numbersStr = input.split(",");
+        int numLines = numbersStr.length;
+
+        Pane pane = new Pane();
+        pane.setPadding(new Insets(10));
+
+        double yOffset = 30;
+        double yInterval = 30;
+        double width = 300;
+
+        for (int i = 0; i < numLines; i++) {
+            Line line = new Line(40, yOffset + (i * yInterval), width, yOffset + (i * yInterval));
+            line.setStroke(Color.BLACK);
+            pane.getChildren().add(line);
+
+            // Creează o etichetă pentru fiecare număr in dreapta liniilo
+            Label numberLabel = new Label(numbersStr[i].trim());
+            numberLabel.setLayoutX(0); // Poziționează eticheta după linie
+            numberLabel.setLayoutY(yOffset + (i * yInterval) - 10); // Ajustează poziția pe axa Y
+            numberLabel.setPadding(new Insets(0, 10, 0, 10)); // Adaugă spațiu între număr și linie
+            pane.getChildren().add(numberLabel);
+        }
+        int[] numbers = new int[numLines];
+        for (int i = 0; i < numLines; i++) {
+            numbers[i] = Integer.parseInt(numbersStr[i].trim());
+        }
+        Sorting.sort(numbers);
+
+        double width1 = 400;
+
+        for(int i = 0; i < numLines; i++){
+            // Creează o etichetă pentru fiecare număr sortat în ordinea de citire
+            Label numberLabel1 = new Label(Integer.toString(numbers[i]));
+            numberLabel1.setLayoutX(width-10); // Poziționează eticheta după linie
+            numberLabel1.setLayoutY(yOffset + (i * yInterval) - 10); // Ajustează poziția pe axa Y
+            numberLabel1.setPadding(new Insets(0, 30, 0, 30)); // Adaugă spațiu între număr și linie
+            pane.getChildren().add(numberLabel1);
+        }
+
+        Scene scene = new Scene(pane,width1, numLines * yInterval + 40);
+        stage.setScene(scene);
+        stage.show();
+    }
+
 
     public static void main(String[] args) {
         launch(args);
