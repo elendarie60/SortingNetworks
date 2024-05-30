@@ -13,6 +13,6 @@ public class NumberInputValidator {
                 return false;
             }
         }
-        return true;
+        return input.matches("(-?\\\\d+,\\\\s*)*-?\\\\d+");
     }
 }
