@@ -1,4 +1,4 @@
-package org.example;
+package sortingnetworks;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
