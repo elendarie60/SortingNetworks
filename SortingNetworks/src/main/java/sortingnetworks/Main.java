@@ -6,27 +6,24 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.io.IOException;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
-import java.io.IOException;
-import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.scene.shape.Line;
 import javafx.scene.paint.Color;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 public class Main extends Application {
     private TextField inputField;
@@ -40,7 +37,6 @@ public class Main extends Application {
         inputField = new TextField();
         Button sortButton = new Button("Sortează");
         sortButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
             public void handle(ActionEvent event) {
                 sortNumbers();
                 openSortingVisualizer();
@@ -60,8 +56,6 @@ public class Main extends Application {
         Scene scene = new Scene(layout, 400, 300);
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        DatabaseHelper.createTable();
     }
 
     private void saveSortedNumbers(int[] numbers) {
@@ -71,14 +65,21 @@ public class Main extends Application {
         }
         String sortedNumbersStr = result.toString().trim();
 
-        String sql = "INSERT INTO sorted_numbers (numbers) VALUES (?)";
-        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:sorting_networks.db");
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, sortedNumbersStr);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
+        try (FileWriter writer = new FileWriter("sorted_numbers.txt")) {
+            writer.write(sortedNumbersStr);
+        } catch (IOException e) {
             e.printStackTrace();
+            // Handle file writing error message to the user
+            showAlert("Error", "Failed to save sorted numbers: " + e.getMessage());
         }
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private void updateOutputLabel(int[] numbers) {
@@ -106,20 +107,26 @@ public class Main extends Application {
         String sortedNumbersStr = sortedNumbers.toString();
 
         outputLabel.setText("Tabloul sortat: " + sortedNumbersStr);
-        DatabaseHelper.insertSorting(input, sortedNumbersStr);
+        //DatabaseHelper.insertSorting(input, sortedNumbersStr);
     }
 
     private void loadHistory() {
-        List<String> history = DatabaseHelper.getHistory();
-        StringBuilder historyBuilder = new StringBuilder();
-        for (String entry : history) {
-            historyBuilder.append(entry).append("\n");
+        try (BufferedReader reader = new BufferedReader(new FileReader("history.txt"))) {
+            StringBuilder historyBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                historyBuilder.append(line).append("\n");
+            }
+            String historyStr = historyBuilder.toString();
+            historyArea.setText(historyStr);
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle file reading error
+            System.err.println("Failed to load history: " + e.getMessage());
         }
-        String historyStr = historyBuilder.toString();
-        historyArea.setText(historyStr);
     }
 
-     private void openSortingVisualizer() {
+    private void openSortingVisualizer() {
         Stage stage = new Stage();
         stage.setTitle("Sorting Network Visualizer");
 
@@ -150,7 +157,7 @@ public class Main extends Application {
         for (int i = 0; i < numLines; i++) {
             numbers[i] = Integer.parseInt(numbersStr[i].trim());
         }
-        Sorting.sort(numbers);
+        SortingNetworks.sort(numbers);
 
         double width1 = 400;
 
@@ -167,7 +174,6 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
     }
-
 
     public static void main(String[] args) {
         launch(args);
