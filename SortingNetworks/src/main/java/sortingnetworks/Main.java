@@ -1,5 +1,6 @@
 package sortingnetworks;
 import java.util.List;
+import java.util.Arrays;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -14,9 +15,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Pane;
-import javafx.scene.shape.Line;
-import javafx.scene.paint.Color;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -103,11 +101,10 @@ public class Main extends Application {
             numbers[i] = Integer.parseInt(numbersStr[i].trim());
         }
 
-        List<Integer> sortedNumbers = SortingNetworks.sort(numbers);
-        String sortedNumbersStr = sortedNumbers.toString();
-
-        outputLabel.setText("Tabloul sortat: " + sortedNumbersStr);
-        //DatabaseHelper.insertSorting(input, sortedNumbersStr);
+        // Create an instance of SortingNetworks and sort the numbers
+        SortingNetworks sortingNetworks = new SortingNetworks(10, 30, 50); // Example parameters
+        // Update output label
+        outputLabel.setText("Tabloul sortat: " + Arrays.toString(numbers));
     }
 
     private void loadHistory() {
@@ -127,52 +124,19 @@ public class Main extends Application {
     }
 
     private void openSortingVisualizer() {
-        Stage stage = new Stage();
-        stage.setTitle("Sorting Network Visualizer");
-
         String input = inputField.getText();
-        String[] numbersStr = input.split(",");
-        int numLines = numbersStr.length;
-
-        Pane pane = new Pane();
-        pane.setPadding(new Insets(10));
-
-        double yOffset = 30;
-        double yInterval = 30;
-        double width = 300;
-
-        for (int i = 0; i < numLines; i++) {
-            Line line = new Line(40, yOffset + (i * yInterval), width, yOffset + (i * yInterval));
-            line.setStroke(Color.BLACK);
-            pane.getChildren().add(line);
-
-            // Creează o etichetă pentru fiecare număr in dreapta liniilo
-            Label numberLabel = new Label(numbersStr[i].trim());
-            numberLabel.setLayoutX(0); // Poziționează eticheta după linie
-            numberLabel.setLayoutY(yOffset + (i * yInterval) - 10); // Ajustează poziția pe axa Y
-            numberLabel.setPadding(new Insets(0, 10, 0, 10)); // Adaugă spațiu între număr și linie
-            pane.getChildren().add(numberLabel);
+        if (!input.matches("^-?\\d+(,-?\\d+)*$")) {
+            outputLabel.setText("Introduceți numere valide separate prin virgulă!");
+            return;
         }
-        int[] numbers = new int[numLines];
-        for (int i = 0; i < numLines; i++) {
+        String[] numbersStr = input.split(",");
+        int[] numbers = new int[numbersStr.length];
+        for (int i = 0; i < numbersStr.length; i++) {
             numbers[i] = Integer.parseInt(numbersStr[i].trim());
         }
-        SortingNetworks.sort(numbers);
 
-        double width1 = 400;
-
-        for(int i = 0; i < numLines; i++){
-            // Creează o etichetă pentru fiecare număr sortat în ordinea de citire
-            Label numberLabel1 = new Label(Integer.toString(numbers[i]));
-            numberLabel1.setLayoutX(width-10); // Poziționează eticheta după linie
-            numberLabel1.setLayoutY(yOffset + (i * yInterval) - 10); // Ajustează poziția pe axa Y
-            numberLabel1.setPadding(new Insets(0, 30, 0, 30)); // Adaugă spațiu între număr și linie
-            pane.getChildren().add(numberLabel1);
-        }
-
-        Scene scene = new Scene(pane,width1, numLines * yInterval + 40);
-        stage.setScene(scene);
-        stage.show();
+        SortingVisualizer visualizer = new SortingVisualizer(numbers);
+        visualizer.show(new Stage());
     }
 
     public static void main(String[] args) {
