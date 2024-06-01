@@ -1,74 +1,88 @@
 package sortingnetworks;
-import javafx.application.Application;
+
+import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class SortingVisualizer extends Application {
-    private int[] array;
+public class SortingVisualizer {
+    private final int[] array;
+    private final SortingNetworks sortingNetwork;
+    private Pane pane;
+    private Label[] labels;
 
     public SortingVisualizer(int[] array) {
-        this.array = array;
+        this.array = array.clone();
+        double yOffset = 30;
+        double yInterval = 30;
+        double xPosition = 200; // Initial x position for comparators
+        this.sortingNetwork = new SortingNetworks(yOffset, yInterval, xPosition);
     }
 
-    @Override
-    public void start(Stage stage) {
-        stage.setTitle("Sorting Network Visualization");
+    public void show(Stage stage) {
+        pane = new Pane();
+        pane.setPadding(new Insets(10));
 
-        Canvas canvas = new Canvas(800, 600);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+        labels = new Label[array.length];
 
-        drawSortingNetwork(gc, array);
+        double yOffset = 30;
+        double yInterval = 30;
+        double width = 300;
 
-        Pane root = new Pane();
-        root.getChildren().add(canvas);
-        Scene scene = new Scene(root);
+        for (int i = 0; i < array.length; i++) {
+            Line line = new Line(40, yOffset + (i * yInterval), width, yOffset + (i * yInterval));
+            line.setStroke(Color.BLACK);
+            pane.getChildren().add(line);
 
+            labels[i] = new Label(Integer.toString(array[i]));
+            labels[i].setLayoutX(0);
+            labels[i].setLayoutY(yOffset + (i * yInterval) - 10);
+            labels[i].setPadding(new Insets(0, 10, 0, 10));
+            pane.getChildren().add(labels[i]);
+        }
+
+        for (Comparator comparator : sortingNetwork.getComparators()) {
+            pane.getChildren().add(comparator.getLine());
+        }
+
+        Scene scene = new Scene(pane, 400, array.length * yInterval + 40);
         stage.setScene(scene);
         stage.show();
+
+        new Thread(this::runVisualization).start();
     }
 
-    private void drawSortingNetwork(GraphicsContext gc, int[] array) {
-        int width = 800;
-        int height = 600;
-        int n = array.length;
+    private void runVisualization() {
+        try {
+            for (Comparator comparator : sortingNetwork.getComparators()) {
+                Platform.runLater(() -> {
+                    comparator.getLine().setStroke(Color.GREEN);
+                });
 
-        // Configurăm dimensiunile
-        int step = width / (n + 1);
-        int verticalStep = height / (n + 1);
+                Thread.sleep(1000); // Delay for visualization
 
-        // Desenăm elementele array-ului
-        for (int i = 0; i < n; i++) {
-            gc.strokeText(String.valueOf(array[i]), (i + 1) * step, 50);
-        }
+                comparator.compareAndSwap(array);
+                int index1 = comparator.getFrom();
+                int index2 = comparator.getTo();
 
-        // Generăm și desenăm comparatoarele
-        int[][] comparators = generateSortingNetwork(n);
-        for (int[] comparator : comparators) {
-            int x1 = (comparator[0] + 1) * step;
-            int x2 = (comparator[1] + 1) * step;
-            int y = (comparator[0] + 1) * verticalStep;
+                Platform.runLater(() -> {
+                    labels[index1].setText(Integer.toString(array[index1]));
+                    labels[index2].setText(Integer.toString(array[index2]));
+                });
 
-            gc.strokeLine(x1, y, x2, y);
-        }
-    }
+                Thread.sleep(1000); // Delay for visualization
 
-    private static int[][] generateSortingNetwork(int n) {
-        List<int[]> comparatorsList = new ArrayList<>();
-        for (int i = n / 2; i > 0; i /= 2) {
-            for (int j = i; j < n - i; j += i * 2) {
-                for (int k = 0; k < i; k++) {
-                    int[] comparator = {j + k, j + k + i};
-                    comparatorsList.add(comparator);
-                }
+                Platform.runLater(() -> {
+                    comparator.getLine().setStroke(Color.RED);
+                });
             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        return comparatorsList.toArray(new int[0][]);
     }
 }
 
