@@ -14,6 +14,9 @@ public class SortingVisualizer {
     private final SortingNetworks sortingNetwork;
     private Pane pane;
     private Label[] labels;
+    private Line[] horizontalLines;
+    private Line[] dottedLines;
+    private final Color[] dottedLineColors = {Color.RED, Color.GREEN, Color.BLUE, Color.ORANGE, Color.PURPLE};
 
     public SortingVisualizer(int[] array) {
         this.array = array.clone();
@@ -21,6 +24,8 @@ public class SortingVisualizer {
         double yInterval = 30;
         double xPosition = 200; // Initial x position for comparators
         this.sortingNetwork = new SortingNetworks(yOffset, yInterval, xPosition);
+         horizontalLines = new Line[array.length];
+        this.dottedLines = new Line[array.length];
     }
 
     public void show(Stage stage) {
@@ -28,10 +33,12 @@ public class SortingVisualizer {
         pane.setPadding(new Insets(10));
 
         labels = new Label[array.length];
+        horizontalLines = new Line[array.length]; // Adaugăm inițializarea pentru linii orizontale
 
         double yOffset = 30;
         double yInterval = 30;
         double width = 300;
+        double dottedLineYOffset = 5;
 
         for (int i = 0; i < array.length; i++) {
             Line line = new Line(40, yOffset + (i * yInterval), width, yOffset + (i * yInterval));
@@ -43,6 +50,17 @@ public class SortingVisualizer {
             labels[i].setLayoutY(yOffset + (i * yInterval) - 10);
             labels[i].setPadding(new Insets(0, 10, 0, 10));
             pane.getChildren().add(labels[i]);
+
+            labels[i] = new Label(Integer.toString(array[i]));
+            labels[i].setLayoutX(width+5);
+            labels[i].setLayoutY(yOffset + (i * yInterval) - 10);
+            labels[i].setPadding(new Insets(0, 10, 0, 10));
+            pane.getChildren().add(labels[i]);
+
+              dottedLines[i] = new Line(40, yOffset + (i * yInterval)+dottedLineYOffset, 40, yOffset + (i * yInterval)+dottedLineYOffset);
+            dottedLines[i].setStroke(dottedLineColors[i%dottedLineColors.length]); // Schimbăm culoarea în roșu
+            dottedLines[i].getStrokeDashArray().addAll(5d, 5d); // Facem linia punctată
+            pane.getChildren().add(dottedLines[i]);
         }
 
         for (Comparator comparator : sortingNetwork.getComparators()) {
@@ -63,7 +81,7 @@ public class SortingVisualizer {
                     comparator.getLine().setStroke(Color.GREEN);
                 });
 
-                Thread.sleep(1000); // Delay for visualization
+                Thread.sleep(1000); 
 
                 comparator.compareAndSwap(array);
                 int index1 = comparator.getFrom();
@@ -72,6 +90,8 @@ public class SortingVisualizer {
                 Platform.runLater(() -> {
                     labels[index1].setText(Integer.toString(array[index1]));
                     labels[index2].setText(Integer.toString(array[index2]));
+                     dottedLines[index1].setEndX(300); 
+                        dottedLines[index2].setEndX(300); 
                 });
 
                 Thread.sleep(1000); // Delay for visualization
