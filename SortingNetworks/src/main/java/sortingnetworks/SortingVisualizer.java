@@ -90,8 +90,13 @@ public class SortingVisualizer {
                 Platform.runLater(() -> {
                     labels[index1].setText(Integer.toString(array[index1]));
                     labels[index2].setText(Integer.toString(array[index2]));
-                     dottedLines[index1].setEndX(300); 
-                        dottedLines[index2].setEndX(300); 
+                    double comparisonX = comparator.getLine().getStartX();
+                        dottedLines[index1].setEndX(comparisonX); // Actualizare capăt linie punctată
+                        dottedLines[index2].setEndX(comparisonX);
+                     double tempY = dottedLines[index1].getStartY();
+                        dottedLines[index1].setStartY(dottedLines[index2].getStartY());
+                        dottedLines[index2].setStartY(tempY);
+
                 });
 
                 Thread.sleep(1000); // Delay for visualization
