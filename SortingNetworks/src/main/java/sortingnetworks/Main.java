@@ -1,27 +1,15 @@
 package sortingnetworks;
-import java.util.List;
-import java.util.Arrays;
+
+import java.util.*;
+import java.io.*;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import java.io.IOException;
 import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
+import javafx.stage.Stage;
 
 public class Main extends Application {
     private TextField inputField;
@@ -29,15 +17,19 @@ public class Main extends Application {
     private TextArea historyArea;
 
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Sorting Network App");
+        primaryStage.setTitle("Sorting Networks App");
 
         Label inputLabel = new Label("Introduceți numere separate prin virgulă:");
         inputField = new TextField();
         Button sortButton = new Button("Sortează");
         sortButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                sortNumbers();
-                openSortingVisualizer();
+                try {
+                    sortNumbers();
+                    openSortingVisualizer();
+                } catch (Exception e) {
+                    showAlert("Eroare", "A apărut o eroare: " + e.getMessage());
+                }
             }
         });
 
@@ -66,14 +58,12 @@ public class Main extends Application {
         try (FileWriter writer = new FileWriter("sorted_numbers.txt")) {
             writer.write(sortedNumbersStr);
         } catch (IOException e) {
-            e.printStackTrace();
-            // Handle file writing error message to the user
-            showAlert("Error", "Failed to save sorted numbers: " + e.getMessage());
+            showAlert("Eroare", "Nu s-a putut salva rezultatul sortării: " + e.getMessage());
         }
     }
 
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(AlertType.ERROR);
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
@@ -91,20 +81,30 @@ public class Main extends Application {
 
     private void sortNumbers() {
         String input = inputField.getText();
-        if (!NumberInputValidator.isValidInput(input)) {
+        if (!input.matches("^-?\\d+(,-?\\d+)*$")) {
             outputLabel.setText("Introduceți numere valide separate prin virgulă!");
             return;
         }
         String[] numbersStr = input.split(",");
         int[] numbers = new int[numbersStr.length];
         for (int i = 0; i < numbersStr.length; i++) {
-            numbers[i] = Integer.parseInt(numbersStr[i].trim());
+            try {
+                numbers[i] = Integer.parseInt(numbersStr[i].trim());
+            } catch (NumberFormatException e) {
+                showAlert("Eroare", "Numerele introduse nu sunt valide: " + numbersStr[i]);
+                return;
+            }
         }
 
-        // Create an instance of SortingNetworks and sort the numbers
-        SortingNetworks sortingNetworks = new SortingNetworks(10, 30, 50); // Example parameters
-        // Update output label
-        outputLabel.setText("Tabloul sortat: " + Arrays.toString(numbers));
+        double yOffset = 30;
+        double yInterval = 30;
+        double xPosition = 200;
+        int numElements = numbers.length;
+        SortingNetworks sortingNetworks = new SortingNetworks(yOffset, yInterval, xPosition, numElements);
+
+        sortingNetworks.sort(numbers);
+        updateOutputLabel(numbers);
+        saveSortedNumbers(numbers);
     }
 
     private void loadHistory() {
@@ -117,9 +117,7 @@ public class Main extends Application {
             String historyStr = historyBuilder.toString();
             historyArea.setText(historyStr);
         } catch (IOException e) {
-            e.printStackTrace();
-            // Handle file reading error
-            System.err.println("Failed to load history: " + e.getMessage());
+            showAlert("Eroare", "Nu s-a putut încărca istoricul: " + e.getMessage());
         }
     }
 
@@ -132,7 +130,12 @@ public class Main extends Application {
         String[] numbersStr = input.split(",");
         int[] numbers = new int[numbersStr.length];
         for (int i = 0; i < numbersStr.length; i++) {
-            numbers[i] = Integer.parseInt(numbersStr[i].trim());
+            try {
+                numbers[i] = Integer.parseInt(numbersStr[i].trim());
+            } catch (NumberFormatException e) {
+                showAlert("Eroare", "Numerele introduse nu sunt valide: " + numbersStr[i]);
+                return;
+            }
         }
 
         SortingVisualizer visualizer = new SortingVisualizer(numbers);
