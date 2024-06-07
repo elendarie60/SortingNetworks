@@ -69,47 +69,4 @@ public class SortingNetworks {
     public List<Comparator> getComparators() {
         return comparators;
     }
-    public static class Comparator {
-        private final int i;
-        private final int j;
-        private final double yOffset;
-        private final double yInterval;
-        private final double xPosition;
-        private final int dir;
-        private Line line;
-
-        public Comparator(int i, int j, double yOffset, double yInterval, double xPosition, int dir) {
-            this.i = i;
-            this.j = j;
-            this.yOffset = yOffset;
-            this.yInterval = yInterval;
-            this.xPosition = xPosition;
-            this.dir = dir;
-            this.line = new Line(xPosition, yOffset + (i * yInterval), xPosition, yOffset + (j * yInterval));
-        }
-
-        public void compareAndSwap(int[] array) {
-            if (i >= 0 && i < array.length && j >= 0 && j < array.length) {
-                if ((array[i] > array[j]) == (dir == 1)) {
-                    int temp = array[i];
-                    array[i] = array[j];
-                    array[j] = temp;
-                }
-            } else {
-                System.err.println("Index i=" + i + ", j=" + j);
-            }
-        }
-
-        public int getI() {
-            return i;
-        }
-
-        public int getJ() {
-            return j;
-        }
-
-        public Line getLine() {
-            return line;
-        }
-    }
 }
