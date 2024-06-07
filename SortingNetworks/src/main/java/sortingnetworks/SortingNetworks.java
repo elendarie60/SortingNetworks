@@ -5,12 +5,25 @@ import java.util.List;
 import javafx.scene.shape.Line;
 
 public class SortingNetworks {
+     private double yOffset = 30;
+    private double yInterval = 30;
     private List<Comparator> comparators;
 
     public SortingNetworks(double yOffset, double yInterval, double xPosition, int numElements) {
-        this.comparators = new ArrayList<>();
-        int paddedN = numElements % 2 == 0 ? numElements : numElements + 1; // Adăugăm un element suplimentar dacă e impar
-        generateBitonicComparators(yOffset, yInterval, xPosition, paddedN);
+        //this.comparators = new ArrayList<>();
+       // int paddedN = numElements % 2 == 0 ? numElements : numElements + 1; // Adăugăm un element suplimentar dacă e impar
+       // generateBitonicComparators(yOffset, yInterval, xPosition, paddedN);
+        comparators = new ArrayList<>();
+        int padded;
+            padded = numElements;
+        for (int i = 0; i <= padded - 1; i++) {
+            for (int j = i + 1; j < padded; j++) {
+                // Verificăm dacă este necesar să adăugăm un comparator în funcție de poziția elementelor în secvența bitonică
+                int dir = (i < j) ? 1 : 0;
+                comparators.add(new Comparator(i, j, yOffset, yInterval, xPosition-60, dir));
+            }
+            xPosition = xPosition+40;
+        }
     }
 
     private void generateBitonicComparators(double yOffset, double yInterval, double xPosition, int numElements) {
