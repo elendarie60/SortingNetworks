@@ -88,23 +88,20 @@ public class Main extends Application {
         String[] numbersStr = input.split(",");
         int[] numbers = new int[numbersStr.length];
         for (int i = 0; i < numbersStr.length; i++) {
-            try {
+        
                 numbers[i] = Integer.parseInt(numbersStr[i].trim());
-            } catch (NumberFormatException e) {
-                showAlert("Eroare", "Numerele introduse nu sunt valide: " + numbersStr[i]);
-                return;
-            }
         }
 
-        double yOffset = 30;
+        double yOffset = 10;
         double yInterval = 30;
         double xPosition = 200;
         int numElements = numbers.length;
         SortingNetworks sortingNetworks = new SortingNetworks(yOffset, yInterval, xPosition, numElements);
+        outputLabel.setText("Tabloul sortat: " + Arrays.toString(numbers));
 
-        sortingNetworks.sort(numbers);
-        updateOutputLabel(numbers);
-        saveSortedNumbers(numbers);
+       // sortingNetworks.sort(numbers);
+       // updateOutputLabel(numbers);
+        //saveSortedNumbers(numbers);
     }
 
     private void loadHistory() {
@@ -130,12 +127,7 @@ public class Main extends Application {
         String[] numbersStr = input.split(",");
         int[] numbers = new int[numbersStr.length];
         for (int i = 0; i < numbersStr.length; i++) {
-            try {
                 numbers[i] = Integer.parseInt(numbersStr[i].trim());
-            } catch (NumberFormatException e) {
-                showAlert("Eroare", "Numerele introduse nu sunt valide: " + numbersStr[i]);
-                return;
-            }
         }
 
         SortingVisualizer visualizer = new SortingVisualizer(numbers);
